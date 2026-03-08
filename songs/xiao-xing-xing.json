@@ -1,0 +1,21 @@
+{
+  "id": "xiao-xing-xing",
+  "title": "小星星",
+  "subtitle": "Twinkle Twinkle Little Star",
+  "bpm": 96,
+  "difficulty": 1,
+  "notes": [
+    {"num": 1, "dur": 1}, {"num": 1, "dur": 1}, {"num": 5, "dur": 1}, {"num": 5, "dur": 1},
+    {"num": 6, "dur": 1}, {"num": 6, "dur": 1}, {"num": 5, "dur": 2},
+    {"num": 4, "dur": 1}, {"num": 4, "dur": 1}, {"num": 3, "dur": 1}, {"num": 3, "dur": 1},
+    {"num": 2, "dur": 1}, {"num": 2, "dur": 1}, {"num": 1, "dur": 2},
+    {"num": 5, "dur": 1}, {"num": 5, "dur": 1}, {"num": 4, "dur": 1}, {"num": 4, "dur": 1},
+    {"num": 3, "dur": 1}, {"num": 3, "dur": 1}, {"num": 2, "dur": 2},
+    {"num": 5, "dur": 1}, {"num": 5, "dur": 1}, {"num": 4, "dur": 1}, {"num": 4, "dur": 1},
+    {"num": 3, "dur": 1}, {"num": 3, "dur": 1}, {"num": 2, "dur": 2},
+    {"num": 1, "dur": 1}, {"num": 1, "dur": 1}, {"num": 5, "dur": 1}, {"num": 5, "dur": 1},
+    {"num": 6, "dur": 1}, {"num": 6, "dur": 1}, {"num": 5, "dur": 2},
+    {"num": 4, "dur": 1}, {"num": 4, "dur": 1}, {"num": 3, "dur": 1}, {"num": 3, "dur": 1},
+    {"num": 2, "dur": 1}, {"num": 2, "dur": 1}, {"num": 1, "dur": 2}
+  ]
+}
