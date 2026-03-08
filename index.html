@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎵 簡譜節拍師 v2.0 — Rhythm Beat Master</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════
+   🎨 設計哲學：Neon Arcade Street
+   霓虹電玩街 — 深夜街機廳，3D 透視，金屬質感
+   ═══════════════════════════════════════════ */
+    :root {
+      /* 核心配色 */
+      --bg: #04060f;
+      --bg2: #080c1e;
+      --surface: rgba(12, 16, 40, .85);
+      --border: rgba(120, 80, 255, .35);
+
+      /* 霓虹色系 */
+      --neon-p: #b44aff;
+      /* 主紫 */
+      --neon-c: #00f5ff;
+      /* 青色 */
+      --neon-g: #00ff88;
+      /* 綠色 */
+      --neon-o: #ff6b00;
+      /* 橙色 */
+      --neon-r: #ff2d6b;
+      /* 紅粉 */
+      --neon-y: #ffe600;
+      /* 金黃 */
+
+      /* 音符色（彩虹） */
+      --c1: #ff3b5c;
+      --c2: #ff9100;
+      --c3: #ffe600;
+      --c4: #00ff88;
+      --c5: #00e5ff;
+      --c6: #448aff;
+      --c7: #d050ff;
+
+      /* 尺寸 */
+      --jw: 118px;
+      --bh: 58px;
+      --r: 16px;
+
+      --txt: #e8eeff;
+      --dim: #6677aa;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Rajdhani', 'Noto Sans TC', sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      min-height: 100vh;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* ── 全局背景：幾何網格 + 輻射漸層 ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background:
+        linear-gradient(rgba(0, 245, 255, .04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 245, 255, .04) 1px, transparent 1px),
+        radial-gradient(ellipse 80% 60% at 15% 10%, rgba(180, 74, 255, .22) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 50% at 85% 90%, rgba(0, 245, 255, .16) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 50% 50%, rgba(0, 255, 136, .06) 0%, transparent 70%);
+      background-size: 48px 48px, 48px 48px, 100% 100%, 100% 100%, 100% 100%;
+      pointer-events: none;
+    }
+
+    /* ── 掃描線 ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: repeating-linear-gradient(0deg,
+          rgba(0, 0, 0, .06) 0px,
+          rgba(0, 0, 0, .06) 1px,
+          transparent 1px,
+          transparent 4px);
+      pointer-events: none;
+    }
+
+    #stars {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: #fff;
+      animation: twinkle linear infinite;
+    }
+
+    @keyframes twinkle {
+
+      0%,
+      100% {
+        opacity: .15
+      }
+
+      50% {
+        opacity: .85
+      }
+    }
+
+    #app {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* ════════════ HEADER ════════════ */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 24px;
+      background: linear-gradient(135deg, rgba(12, 16, 40, .95), rgba(8, 12, 30, .95));
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid;
+      border-image: linear-gradient(90deg, transparent, var(--neon-p), var(--neon-c), transparent) 1;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, var(--neon-p), var(--neon-c));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 10px rgba(180, 74, 255, .6));
+      letter-spacing: .06em;
+    }
+
+    .logo span {
+      font-size: .72rem;
+      font-weight: 400;
+      color: var(--dim);
+      -webkit-text-fill-color: var(--dim);
+      filter: none;
+      letter-spacing: .04em;
+    }
+
+    #hdr-right {
+      display: none;
+      gap: 10px;
+      align-items: center;
+    }
+
+    #hdr-song {
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--neon-c);
+      letter-spacing: .06em;
+    }
+
+    .hbtn {
+      background: rgba(0, 245, 255, .1);
+      border: 1px solid rgba(0, 245, 255, .45);
+      color: var(--neon-c);
+      padding: 5px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: .82rem;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      letter-spacing: .04em;
+      transition: all .2s;
+      text-shadow: 0 0 8px var(--neon-c);
+    }
+
+    .hbtn:hover {
+      background: rgba(0, 245, 255, .2);
+      box-shadow: 0 0 12px rgba(0, 245, 255, .4);
+    }
+
+    /* ════════════ VIEWS ════════════ */
+    .view {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .view.active {
+      display: flex;
+    }
+
+    /* ════════════ MENU ════════════ */
+    #view-menu {
+      align-items: center;
+      padding: 36px 20px 48px;
+      gap: 0;
+    }
+
+    /* 主標題：3D 立體效果 */
+    .mtitle {
+      font-family: 'Black Han Sans', 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 6vw, 3.8rem);
+      font-weight: 900;
+      text-align: center;
+      line-height: 1.1;
+      margin-bottom: 8px;
+      letter-spacing: .04em;
+      background: linear-gradient(135deg, #fff 0%, var(--neon-c) 40%, var(--neon-p) 80%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      /* 3D 文字陰影層疊 */
+      filter:
+        drop-shadow(0 0 30px rgba(0, 245, 255, .5)) drop-shadow(0 0 60px rgba(180, 74, 255, .3));
+      animation: titlePulse 3s ease-in-out infinite;
+    }
+
+    @keyframes titlePulse {
+
+      0%,
+      100% {
+        filter: drop-shadow(0 0 30px rgba(0, 245, 255, .5)) drop-shadow(0 0 60px rgba(180, 74, 255, .3));
+      }
+
+      50% {
+        filter: drop-shadow(0 0 45px rgba(0, 245, 255, .8)) drop-shadow(0 0 80px rgba(180, 74, 255, .5));
+      }
+    }
+
+    .msub {
+      color: var(--dim);
+      text-align: center;
+      font-size: .93rem;
+      letter-spacing: .06em;
+      margin-bottom: 28px;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+    }
+
+    /* 模式按鈕行 */
+    .mode-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .mbtn {
+      padding: 8px 20px;
+      border-radius: 24px;
+      border: 1.5px solid rgba(255, 255, 255, .15);
+      background: rgba(255, 255, 255, .04);
+      color: var(--dim);
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 600;
+      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: .04em;
+      transition: all .25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .mbtn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(180, 74, 255, .15), rgba(0, 245, 255, .1));
+      opacity: 0;
+      transition: opacity .25s;
+    }
+
+    .mbtn:hover::before,
+    .mbtn.active::before {
+      opacity: 1;
+    }
+
+    .mbtn.active,
+    .mbtn:hover {
+      border-color: var(--neon-p);
+      color: var(--txt);
+      box-shadow: 0 0 16px rgba(180, 74, 255, .35), inset 0 0 12px rgba(180, 74, 255, .1);
+    }
+
+    .mbtn.active {
+      font-weight: 700;
+    }
+
+    [data-mode] span {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* 難度行 */
+    .diff-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .dbtn {
+      padding: 6px 16px;
+      border-radius: 18px;
+      border: 1.5px solid rgba(255, 255, 255, .12);
+      background: rgba(255, 255, 255, .03);
+      color: var(--dim);
+      cursor: pointer;
+      font-size: .8rem;
+      font-weight: 600;
+      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: .04em;
+      transition: all .2s;
+    }
+
+    .dbtn.active[data-diff="easy"] {
+      border-color: var(--neon-g);
+      color: var(--neon-g);
+      background: rgba(0, 255, 136, .1);
+      box-shadow: 0 0 14px rgba(0, 255, 136, .3);
+    }
+
+    .dbtn.active[data-diff="normal"] {
+      border-color: var(--neon-c);
+      color: var(--neon-c);
+      background: rgba(0, 245, 255, .1);
+      box-shadow: 0 0 14px rgba(0, 245, 255, .3);
+    }
+
+    .dbtn.active[data-diff="hard"] {
+      border-color: var(--neon-o);
+      color: var(--neon-o);
+      background: rgba(255, 145, 0, .1);
+      box-shadow: 0 0 14px rgba(255, 145, 0, .3);
+    }
+
+    .dbtn.active[data-diff="expert"] {
+      border-color: var(--neon-r);
+      color: var(--neon-r);
+      background: rgba(255, 45, 107, .12);
+      box-shadow: 0 0 14px rgba(255, 45, 107, .35);
+    }
+
+    .diff-hint {
+      font-size: .73rem;
+      color: var(--dim);
+      margin-bottom: 18px;
+      text-align: center;
+      font-family: 'Rajdhani', sans-serif;
+      letter-spacing: .04em;
+    }
+
+    /* BPM 滑桿 */
+    .bpm-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 360px;
+    }
+
+    .bpm-row label {
+      color: var(--dim);
+      font-size: .85rem;
+      font-weight: 600;
+      white-space: nowrap;
+      letter-spacing: .04em;
+    }
+
+    #bpm-sl {
+      flex: 1;
+      accent-color: var(--neon-p);
+      height: 4px;
+    }
+
+    #bpm-v {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--neon-c);
+      min-width: 68px;
+      text-align: right;
+      font-size: .85rem;
+      text-shadow: 0 0 10px var(--neon-c);
+    }
+
+    /* 自訂樂譜 */
+    .custom-box {
+      width: 100%;
+      max-width: 640px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 30px rgba(120, 80, 255, .15), inset 0 1px 0 rgba(255, 255, 255, .05);
+      backdrop-filter: blur(16px);
+    }
+
+    .custom-box h3 {
+      color: var(--neon-c);
+      font-size: .9rem;
+      margin-bottom: 10px;
+      letter-spacing: .06em;
+    }
+
+    .custom-box textarea {
+      width: 100%;
+      min-height: 76px;
+      background: rgba(0, 0, 0, .4);
+      border: 1px solid rgba(255, 255, 255, .1);
+      border-radius: 8px;
+      color: var(--txt);
+      font-family: 'Orbitron', monospace;
+      font-size: .95rem;
+      padding: 10px 14px;
+      resize: vertical;
+      letter-spacing: .12em;
+    }
+
+    .custom-box textarea::placeholder {
+      color: var(--dim);
+      font-family: 'Rajdhani', sans-serif;
+      font-size: .83rem;
+    }
+
+    .custom-box .hint {
+      font-size: .72rem;
+      color: var(--dim);
+      margin-top: 6px;
+    }
+
+    /* ── 選曲網格 ── */
+    .song-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    /* 選曲卡片：3D 漸層金屬感 */
+    .scard {
+      background: linear-gradient(145deg, rgba(20, 16, 52, .9), rgba(8, 12, 30, .95));
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 20px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform .25s cubic-bezier(.34, 1.56, .64, 1), box-shadow .25s;
+      /* 3D 卡片厚度感 */
+      box-shadow:
+        0 4px 0 rgba(180, 74, 255, .25),
+        0 8px 32px rgba(0, 0, 0, .6),
+        inset 0 1px 0 rgba(255, 255, 255, .08);
+    }
+
+    .scard::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(180, 74, 255, .12) 0%, rgba(0, 245, 255, .08) 50%, transparent 100%);
+      opacity: 0;
+      transition: opacity .3s;
+    }
+
+    .scard::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .06), transparent);
+      transition: left .5s;
+    }
+
+    .scard:hover {
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 10px 0 rgba(180, 74, 255, .2), 0 16px 48px rgba(180, 74, 255, .3), inset 0 1px 0 rgba(255, 255, 255, .1);
+    }
+
+    .scard:hover::before {
+      opacity: 1;
+    }
+
+    .scard:hover::after {
+      left: 140%;
+    }
+
+    .scard .st {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      font-family: 'Black Han Sans', sans-serif;
+      letter-spacing: .04em;
+      background: linear-gradient(90deg, var(--txt) 60%, var(--neon-c));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .scard .ss {
+      font-size: .73rem;
+      color: var(--dim);
+      margin-bottom: 12px;
+      letter-spacing: .04em;
+      font-family: 'Rajdhani', sans-serif;
+    }
+
+    .scard .sm {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* 最高分標籤 */
+    .best-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: linear-gradient(135deg, rgba(255, 230, 0, .2), rgba(255, 145, 0, .15));
+      border: 1px solid rgba(255, 200, 0, .5);
+      color: var(--neon-y);
+      font-size: .68rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 10px;
+      letter-spacing: .04em;
+      text-shadow: 0 0 8px rgba(255, 230, 0, .6);
+      box-shadow: 0 0 10px rgba(255, 200, 0, .2);
+    }
+
+    /* 徽章 */
+    .badge {
+      padding: 3px 10px;
+      border-radius: 16px;
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      background: rgba(120, 80, 255, .15);
+      color: var(--neon-p);
+      border: 1px solid rgba(120, 80, 255, .4);
+    }
+
+    .d1 {
+      background: rgba(0, 255, 136, .1);
+      color: var(--neon-g);
+      border-color: rgba(0, 255, 136, .4);
+    }
+
+    .d2 {
+      background: rgba(255, 145, 0, .1);
+      color: var(--neon-o);
+      border-color: rgba(255, 145, 0, .4);
+    }
+
+    /* 按鈕 */
+    .btn {
+      padding: 11px 28px;
+      border-radius: 28px;
+      border: none;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      letter-spacing: .05em;
+    }
+
+    .btn-p {
+      background: linear-gradient(135deg, var(--neon-p), var(--neon-c));
+      color: #fff;
+      box-shadow: 0 0 20px rgba(180, 74, 255, .5), 0 4px 12px rgba(0, 0, 0, .4);
+      text-shadow: 0 0 10px rgba(255, 255, 255, .5);
+    }
+
+    .btn-p:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 32px rgba(180, 74, 255, .7), 0 6px 20px rgba(0, 0, 0, .4);
+    }
+
+    .btn-s {
+      background: rgba(255, 255, 255, .07);
+      color: var(--txt);
+      border: 1px solid rgba(255, 255, 255, .15);
+    }
+
+    .btn-s:hover {
+      background: rgba(255, 255, 255, .13);
+    }
+
+    /* ════════════ GAME ════════════ */
+    #view-game {
+      position: relative;
+      flex-direction: column;
+      background: var(--bg);
+    }
+
+    /* HUD 頂部 */
+    .ghud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 22px;
+      background: linear-gradient(135deg, rgba(8, 12, 30, .9), rgba(12, 8, 28, .9));
+      border-bottom: 1px solid;
+      border-image: linear-gradient(90deg, transparent, rgba(180, 74, 255, .5), var(--neon-c), rgba(180, 74, 255, .5), transparent) 1;
+      gap: 12px;
+      flex-wrap: wrap;
+      backdrop-filter: blur(12px);
+    }
+
+    /* 進度條 */
+    .prog {
+      flex: 1;
+      min-width: 80px;
+      max-width: 220px;
+      height: 6px;
+      background: rgba(255, 255, 255, .08);
+      border-radius: 3px;
+      overflow: hidden;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, .4);
+    }
+
+    .prog-bar {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--neon-p), var(--neon-c), var(--neon-g));
+      border-radius: 3px;
+      box-shadow: 0 0 10px rgba(0, 245, 255, .6);
+      transition: width .3s linear;
+    }
+
+    #score-el {
+      font-family: 'Orbitron', sans-serif;
+      color: var(--neon-y);
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-shadow: 0 0 14px rgba(255, 230, 0, .7);
+    }
+
+    #combo-el {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      background: linear-gradient(90deg, var(--neon-c), var(--neon-g));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      min-width: 70px;
+      text-align: center;
+      filter: drop-shadow(0 0 8px rgba(0, 245, 255, .6));
+    }
+
+    #mic-bar {
+      display: none;
+      margin-left: auto;
+      font-size: .78rem;
+      color: var(--dim);
+      align-items: center;
+      gap: 7px;
+    }
+
+    .mdot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--neon-g);
+      box-shadow: 0 0 10px var(--neon-g);
+      animation: mpulse 1s ease infinite;
+    }
+
+    @keyframes mpulse {
+
+      0%,
+      100% {
+        transform: scale(1)
+      }
+
+      50% {
+        transform: scale(1.6)
+      }
+    }
+
+    /* 軌道區 */
+    .track-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      padding: 20px 0;
+      /* 漸層背景：上下各有霓虹光暈 */
+      background:
+        radial-gradient(ellipse 100% 60% at 50% 20%, rgba(120, 40, 255, .2) 0%, transparent 70%),
+        radial-gradient(ellipse 100% 60% at 50% 80%, rgba(0, 200, 255, .15) 0%, transparent 70%),
+        linear-gradient(180deg, rgba(12, 8, 30, .98) 0%, rgba(8, 12, 24, .95) 50%, rgba(6, 8, 20, .98) 100%);
+    }
+
+    /* 3D 透視軌道 */
+    .track {
+      position: relative;
+      height: 130px;
+      background:
+        linear-gradient(90deg,
+          rgba(40, 20, 80, .95) 0%,
+          rgba(20, 14, 48, .9) 40%,
+          rgba(10, 8, 28, .85) 70%,
+          rgba(4, 6, 16, .6) 100%);
+      /* 地板光反射 */
+      border-top: 2px solid rgba(180, 74, 255, .6);
+      border-bottom: 2px solid rgba(0, 245, 255, .45);
+      overflow: visible;
+      box-shadow:
+        0 -12px 50px rgba(180, 74, 255, .2),
+        0 12px 50px rgba(0, 245, 255, .15),
+        inset 0 1px 0 rgba(180, 74, 255, .3),
+        inset 0 -1px 0 rgba(0, 245, 255, .2);
+    }
+
+    /* 軌道內部透視網格 */
+    .track::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(rgba(120, 80, 255, .06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 245, 255, .04) 1px, transparent 1px);
+      background-size: 40px 100%, 80px 100%;
+      pointer-events: none;
+    }
+
+    /* 右側霓虹漸出 */
+    .track::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 30%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, var(--bg));
+      pointer-events: none;
+      z-index: 5;
+    }
+
+    /* 判定線：立體光柱 */
+    .jline {
+      position: absolute;
+      left: var(--jw);
+      top: -12px;
+      bottom: -12px;
+      width: 4px;
+      background: linear-gradient(180deg,
+          transparent,
+          rgba(0, 245, 255, .3) 15%,
+          var(--neon-c) 40%,
+          var(--neon-c) 60%,
+          rgba(0, 245, 255, .3) 85%,
+          transparent);
+      box-shadow:
+        0 0 10px var(--neon-c),
+        0 0 30px rgba(0, 245, 255, .5),
+        0 0 60px rgba(0, 245, 255, .2);
+      z-index: 10;
+      pointer-events: none;
+    }
+
+    /* 判定線中心菱形 */
+    .jline::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(45deg);
+      width: 18px;
+      height: 18px;
+      background: var(--neon-c);
+      box-shadow: 0 0 20px var(--neon-c), 0 0 40px rgba(0, 245, 255, .5);
+      border-radius: 3px;
+    }
+
+    /* 判定線光暈環 */
+    .jline::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 245, 255, .3);
+      box-shadow: 0 0 16px rgba(0, 245, 255, .4);
+      animation: jring 2s ease-in-out infinite;
+    }
+
+    @keyframes jring {
+
+      0%,
+      100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: .6;
+      }
+
+      50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: .2;
+      }
+    }
+
+    /* 3D 音符球：金屬光澤 */
+    .nball {
+      position: absolute;
+      top: 50%;
+      width: var(--bh);
+      height: var(--bh);
+      border-radius: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 0;
+      /* 3D 金屬球質感 */
+      box-shadow:
+        inset -4px -4px 12px rgba(0, 0, 0, .6),
+        inset 3px 3px 8px rgba(255, 255, 255, .25),
+        0 4px 16px rgba(0, 0, 0, .5),
+        0 0 32px currentColor;
+      z-index: 20;
+      pointer-events: none;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, .6);
+    }
+
+    /* 高光點 */
+    .nball::before {
+      content: '';
+      position: absolute;
+      top: 18%;
+      left: 22%;
+      width: 28%;
+      height: 20%;
+      background: radial-gradient(ellipse, rgba(255, 255, 255, .7), transparent);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .nball[data-n="1"] {
+      background: radial-gradient(circle at 35% 30%, #ff8fa0, var(--c1) 60%, #8b0020);
+      color: #fff;
+    }
+
+    .nball[data-n="2"] {
+      background: radial-gradient(circle at 35% 30%, #ffd0a0, var(--c2) 60%, #7a3800);
+    }
+
+    .nball[data-n="3"] {
+      background: radial-gradient(circle at 35% 30%, #fff0a0, var(--c3) 60%, #7a6000);
+      color: #222;
+      text-shadow: none;
+    }
+
+    .nball[data-n="4"] {
+      background: radial-gradient(circle at 35% 30%, #a0ffcc, var(--c4) 60%, #006640);
+    }
+
+    .nball[data-n="5"] {
+      background: radial-gradient(circle at 35% 30%, #a0f8ff, var(--c5) 60%, #006080);
+    }
+
+    .nball[data-n="6"] {
+      background: radial-gradient(circle at 35% 30%, #b0ccff, var(--c6) 60%, #002280);
+    }
+
+    .nball[data-n="7"] {
+      background: radial-gradient(circle at 35% 30%, #e8a0ff, var(--c7) 60%, #5c0080);
+    }
+
+    .nball[data-n="0"] {
+      background: radial-gradient(circle at 35% 30%, #888, #333 60%, #111);
+      font-size: .85rem;
+      color: #aaa;
+    }
+
+    /* 長音尾巴 */
+    .ntail {
+      position: absolute;
+      top: 50%;
+      height: 14px;
+      border-radius: 7px;
+      transform: translateY(-50%);
+      opacity: .55;
+      z-index: 15;
+      pointer-events: none;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    /* 爆炸動畫 */
+    @keyframes hit-burst {
+      0% {
+        transform: translateY(-50%) scale(1);
+        opacity: 1;
+      }
+
+      40% {
+        transform: translateY(-50%) scale(1.8);
+        opacity: .9;
+      }
+
+      100% {
+        transform: translateY(-50%) scale(3);
+        opacity: 0;
+      }
+    }
+
+    .nball.hit {
+      animation: hit-burst .4s ease-out forwards;
+    }
+
+    @keyframes miss-sh {
+
+      0%,
+      100% {
+        transform: translateY(-50%) translateX(0);
+        opacity: 1;
+      }
+
+      25% {
+        transform: translateY(-50%) translateX(-8px);
+        opacity: .7;
+      }
+
+      75% {
+        transform: translateY(-50%) translateX(8px);
+        opacity: .7;
+      }
+    }
+
+    .nball.miss {
+      animation: miss-sh .3s ease;
+    }
+
+    /* 判定文字 */
+    .jtxt {
+      position: absolute;
+      left: calc(var(--jw) + 16px);
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      font-weight: 900;
+      pointer-events: none;
+      z-index: 30;
+      animation: jpop .7s ease forwards;
+      letter-spacing: .06em;
+    }
+
+    .jtxt.perfect {
+      color: var(--neon-y);
+      text-shadow: 0 0 16px var(--neon-y), 0 0 32px rgba(255, 230, 0, .5);
+    }
+
+    .jtxt.good {
+      color: var(--neon-g);
+      text-shadow: 0 0 12px var(--neon-g);
+    }
+
+    .jtxt.miss {
+      color: var(--neon-r);
+      text-shadow: 0 0 10px rgba(255, 45, 107, .6);
+    }
+
+    @keyframes jpop {
+      0% {
+        opacity: 1;
+        transform: translateY(-50%) scale(.7);
+      }
+
+      20% {
+        transform: translateY(-58%) scale(1.2);
+      }
+
+      70% {
+        opacity: 1;
+        transform: translateY(-70%) scale(1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translateY(-82%) scale(.85);
+      }
+    }
+
+    /* 粒子 */
+    @keyframes pfly {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 1;
+      }
+
+      100% {
+        transform: translate(var(--dx), var(--dy)) scale(0);
+        opacity: 0;
+      }
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: pfly .6s ease-out forwards;
+      z-index: 40;
+    }
+
+    /* ════════════ 虛擬按鍵 ════════════ */
+    .khint {
+      display: flex;
+      justify-content: center;
+      align-items: stretch;
+      gap: 0;
+      padding: 0;
+      background: linear-gradient(180deg, rgba(16, 8, 40, .98), rgba(6, 8, 22, 1));
+      /* 頂部彩虹光條 */
+      border-top: 2px solid transparent;
+      border-image: linear-gradient(90deg,
+          var(--c1), var(--c2), var(--c3), var(--c4), var(--c5), var(--c6), var(--c7)) 1;
+      flex-wrap: wrap;
+      touch-action: none;
+      /* 按鍵區光暈 */
+      box-shadow: 0 -16px 60px rgba(120, 40, 255, .3);
+    }
+
+    .kcap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      flex: 1;
+      min-width: 44px;
+      max-width: 80px;
+    }
+
+    /* 3D 立體按鍵 */
+    .k {
+      width: 100%;
+      aspect-ratio: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 900;
+      cursor: pointer;
+      position: relative;
+      border: none;
+      transition: all .08s;
+      /* 3D 立體效果 */
+      border-top: 2px solid transparent;
+      border-bottom: 3px solid transparent;
+      background-clip: padding-box;
+      letter-spacing: 0;
+    }
+
+    /* 各按鍵色彩主題 */
+    .k#k1 {
+      background: linear-gradient(180deg, rgba(255, 60, 92, .18), rgba(255, 60, 92, .06));
+      border-top-color: rgba(255, 60, 92, .5);
+      border-bottom-color: rgba(120, 0, 30, .5);
+      color: var(--c1);
+      text-shadow: 0 0 10px var(--c1);
+    }
+
+    .k#k2 {
+      background: linear-gradient(180deg, rgba(255, 145, 0, .18), rgba(255, 145, 0, .06));
+      border-top-color: rgba(255, 145, 0, .5);
+      border-bottom-color: rgba(120, 60, 0, .5);
+      color: var(--c2);
+      text-shadow: 0 0 10px var(--c2);
+    }
+
+    .k#k3 {
+      background: linear-gradient(180deg, rgba(255, 230, 0, .18), rgba(255, 230, 0, .06));
+      border-top-color: rgba(255, 230, 0, .5);
+      border-bottom-color: rgba(120, 100, 0, .5);
+      color: var(--c3);
+      text-shadow: 0 0 10px var(--c3);
+    }
+
+    .k#k4 {
+      background: linear-gradient(180deg, rgba(0, 255, 136, .18), rgba(0, 255, 136, .06));
+      border-top-color: rgba(0, 255, 136, .5);
+      border-bottom-color: rgba(0, 80, 40, .5);
+      color: var(--c4);
+      text-shadow: 0 0 10px var(--c4);
+    }
+
+    .k#k5 {
+      background: linear-gradient(180deg, rgba(0, 245, 255, .18), rgba(0, 245, 255, .06));
+      border-top-color: rgba(0, 245, 255, .5);
+      border-bottom-color: rgba(0, 80, 100, .5);
+      color: var(--c5);
+      text-shadow: 0 0 10px var(--c5);
+    }
+
+    .k#k6 {
+      background: linear-gradient(180deg, rgba(68, 138, 255, .18), rgba(68, 138, 255, .06));
+      border-top-color: rgba(68, 138, 255, .5);
+      border-bottom-color: rgba(0, 30, 120, .5);
+      color: var(--c6);
+      text-shadow: 0 0 10px var(--c6);
+    }
+
+    .k#k7 {
+      background: linear-gradient(180deg, rgba(208, 80, 255, .18), rgba(208, 80, 255, .06));
+      border-top-color: rgba(208, 80, 255, .5);
+      border-bottom-color: rgba(80, 0, 120, .5);
+      color: var(--c7);
+      text-shadow: 0 0 10px var(--c7);
+    }
+
+    /* 按鍵按下：3D 下壓 */
+    .k.pressed {
+      transform: translateY(3px);
+      border-top-color: transparent !important;
+      border-bottom-width: 0 !important;
+      filter: brightness(1.8);
+    }
+
+    .k.pressed::after {
+      opacity: 1 !important;
+    }
+
+    /* 錯誤按鍵：紅閃 */
+    .k.wrong {
+      background: rgba(255, 45, 107, .25) !important;
+      border-top-color: rgba(255, 45, 107, .8) !important;
+      filter: brightness(1.4);
+    }
+
+    /* 底部音名標示 */
+    .kl {
+      font-size: .62rem;
+      color: var(--dim);
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+      letter-spacing: .04em;
+      padding: 3px 0 5px;
+      background: rgba(0, 0, 0, .4);
+      width: 100%;
+      text-align: center;
+    }
+
+    /* ════════════ 暫停遮罩 ════════════ */
+    .pause-ov {
+      position: fixed;
+      inset: 0;
+      z-index: 90;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, .75);
+      backdrop-filter: blur(12px);
+    }
+
+    .pause-box {
+      background: linear-gradient(145deg, rgba(16, 10, 48, .97), rgba(8, 12, 40, .97));
+      border: 1px solid rgba(180, 74, 255, .4);
+      border-radius: 22px;
+      padding: 40px 52px;
+      text-align: center;
+      box-shadow: 0 0 60px rgba(180, 74, 255, .25), 0 0 120px rgba(0, 245, 255, .1);
+    }
+
+    .pause-box h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      margin-bottom: 22px;
+      color: var(--neon-c);
+      text-shadow: 0 0 20px var(--neon-c);
+      letter-spacing: .1em;
+    }
+
+    /* ════════════ 倒數 ════════════ */
+    .cd-ov {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(4, 6, 15, .8);
+      backdrop-filter: blur(8px);
+    }
+
+    .cd-num {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 9rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #fff 0%, var(--neon-c) 40%, var(--neon-p) 80%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 40px rgba(0, 245, 255, .7));
+      animation: cdpop .85s cubic-bezier(.34, 1.56, .64, 1) both;
+    }
+
+    @keyframes cdpop {
+      0% {
+        transform: scale(3);
+        opacity: 0;
+        filter: drop-shadow(0 0 80px rgba(180, 74, 255, .9));
+      }
+
+      60% {
+        transform: scale(.92);
+        opacity: 1;
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    /* ════════════ RESULT ════════════ */
+    #view-result {
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+    }
+
+    .rcard {
+      background: linear-gradient(145deg, rgba(20, 12, 56, .95), rgba(8, 10, 32, .98));
+      border: 1px solid rgba(120, 80, 255, .4);
+      border-radius: 24px;
+      padding: 36px 40px;
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      box-shadow:
+        0 0 0 1px rgba(0, 245, 255, .08),
+        0 0 60px rgba(180, 74, 255, .2),
+        0 0 120px rgba(0, 245, 255, .08),
+        0 20px 60px rgba(0, 0, 0, .7);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .rcard::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--neon-p), var(--neon-c), transparent);
+    }
+
+    /* 大評等字母 — 3D 感 */
+    .rgrade {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 6rem;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 8px;
+      letter-spacing: .04em;
+    }
+
+    .gS {
+      background: linear-gradient(135deg, #fff7a0, #ffd700, #ff9900);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 30px rgba(255, 200, 0, .7));
+    }
+
+    .gA {
+      background: linear-gradient(135deg, #a0f0ff, #00e5ff, #0088ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 30px rgba(0, 200, 255, .7));
+    }
+
+    .gB {
+      background: linear-gradient(135deg, #a0ffcc, #00ff88, #00cc66);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 24px rgba(0, 255, 120, .6));
+    }
+
+    .gC {
+      background: linear-gradient(135deg, #ddd, #999, #666);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 12px rgba(180, 180, 180, .4));
+    }
+
+    .rsong {
+      color: var(--dim);
+      margin-bottom: 4px;
+      font-size: .95rem;
+      letter-spacing: .06em;
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600;
+    }
+
+    /* 新記錄 */
+    #r-newrec {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: .88rem;
+      font-weight: 900;
+      color: var(--neon-y);
+      letter-spacing: .1em;
+      text-shadow: 0 0 16px var(--neon-y), 0 0 32px rgba(255, 200, 0, .5);
+      animation: newrec .6s ease both;
+    }
+
+    @keyframes newrec {
+      from {
+        transform: scale(.5);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .rstats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 16px 0 24px;
+    }
+
+    .sbox {
+      background: rgba(255, 255, 255, .04);
+      border: 1px solid rgba(120, 80, 255, .2);
+      border-radius: 12px;
+      padding: 12px 14px;
+    }
+
+    .sbox .sv {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .sbox .sk {
+      font-size: .7rem;
+      color: var(--dim);
+      margin-top: 3px;
+      letter-spacing: .04em;
+    }
+
+    .rbtns {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    /* ════════════ RWD ════════════ */
+    @media (max-width: 640px) {
+      :root {
+        --jw: 82px;
+        --bh: 46px;
+      }
+
+      .mtitle {
+        font-size: clamp(1.5rem, 8vw, 2.4rem);
+      }
+
+      .song-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .track {
+        height: 100px;
+      }
+
+      .rcard {
+        padding: 24px 18px;
+      }
+
+      .rgrade {
+        font-size: 4rem;
+      }
+
+      .rstats {
+        gap: 8px;
+      }
+
+      .pause-box {
+        padding: 28px 24px;
+      }
+
+      .cd-num {
+        font-size: 6rem;
+      }
+
+      .k {
+        font-size: .95rem;
+      }
+
+      .logo {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 400px) {
+      :root {
+        --jw: 68px;
+        --bh: 40px;
+      }
+
+      .kl {
+        font-size: .55rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="stars"></div>
+  <div id="app">
+
+    <header>
+      <div class="logo">🎵 節拍師 <span>BEAT MASTER</span></div>
+      <div id="hdr-right">
+        <span id="hdr-song"></span>
+        <button class="hbtn" onclick="doPause()">⏸ 暫停</button>
+      </div>
+    </header>
+
+    <!-- ══ MENU ══ -->
+    <section id="view-menu" class="view active">
+      <h1 class="mtitle">🎵 簡譜節拍師</h1>
+      <p class="msub">CHOOSE YOUR SONG · FOLLOW THE BEAT</p>
+
+      <div class="mode-row">
+        <button class="mbtn active" data-mode="keyboard" id="mb-keyboard">⌨️ 鍵盤模式</button>
+        <button class="mbtn" data-mode="mic" id="mb-mic">🎤 麥克風</button>
+        <button class="mbtn" data-mode="custom" id="mb-custom">✏️ 自訂</button>
+      </div>
+
+      <div class="diff-row">
+        <button class="dbtn" data-diff="easy">🟢 初學</button>
+        <button class="dbtn active" data-diff="normal">⭐ 一般</button>
+        <button class="dbtn" data-diff="hard">🔥 高手</button>
+        <button class="dbtn" data-diff="expert">💀 地獄</button>
+      </div>
+      <p class="diff-hint" id="diff-hint">⭐ 一般 — Perfect ±150ms ／ Good ±320ms</p>
+
+      <div class="bpm-row">
+        <label>速度</label>
+        <input type="range" id="bpm-sl" min="50" max="180" value="100">
+        <span id="bpm-v">100 BPM</span>
+      </div>
+
+      <div class="custom-box" id="custom-box" style="display:none">
+        <h3>✏️ 自訂簡譜</h3>
+        <textarea id="custom-in" placeholder="輸入數字 1～7，空格分隔，例如：1 1 5 5 6 6 5&#10;附點音符：1. = 1.5 拍　休止符：0"
+          rows="3"></textarea>
+        <p class="hint">♪ 每個數字一個音符，附點 1. 為長音，0 為休止符</p>
+        <div style="margin-top:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <label style="color:var(--dim);font-size:.83rem;font-family:'Rajdhani',sans-serif">曲名：</label>
+          <input id="custom-title" value="自訂旋律"
+            style="background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:#fff;padding:5px 12px;width:160px;font-family:'Rajdhani',sans-serif">
+          <button class="btn btn-p" onclick="startCustom()">▶ 開始</button>
+        </div>
+      </div>
+
+      <div class="song-grid" id="song-grid"></div>
+    </section>
+
+    <!-- ══ GAME ══ -->
+    <section id="view-game" class="view">
+      <div class="ghud">
+        <div class="prog">
+          <div class="prog-bar" id="prog-bar"></div>
+        </div>
+        <div id="score-el">0</div>
+        <div id="combo-el"></div>
+        <div id="mic-bar">
+          <div class="mdot"></div>
+          <span style="font-family:'Rajdhani',sans-serif;letter-spacing:.04em">偵測：</span>
+          <b id="mic-note"
+            style="color:var(--neon-g);font-family:'Orbitron',sans-serif;font-size:.88rem;text-shadow:0 0 10px var(--neon-g)">—</b>
+        </div>
+      </div>
+
+      <div class="track-area">
+        <div class="track" id="track-el"></div>
+      </div>
+
+      <!-- 3D 虛擬按鍵列 -->
+      <div class="khint" id="khint">
+        <div class="kcap">
+          <div class="k" id="k1" data-num="1">1</div>
+          <div class="kl">Do</div>
+        </div>
+        <div class="kcap">
+          <div class="k" id="k2" data-num="2">2</div>
+          <div class="kl">Re</div>
+        </div>
+        <div class="kcap">
+          <div class="k" id="k3" data-num="3">3</div>
+          <div class="kl">Mi</div>
+        </div>
+        <div class="kcap">
+          <div class="k" id="k4" data-num="4">4</div>
+          <div class="kl">Fa</div>
+        </div>
+        <div class="kcap">
+          <div class="k" id="k5" data-num="5">5</div>
+          <div class="kl">Sol</div>
+        </div>
+        <div class="kcap">
+          <div class="k" id="k6" data-num="6">6</div>
+          <div class="kl">La</div>
+        </div>
+        <div class="kcap">
+          <div class="k" id="k7" data-num="7">7</div>
+          <div class="kl">Si</div>
+        </div>
+      </div>
+
+      <div class="pause-ov" id="pause-ov" style="display:none">
+        <div class="pause-box">
+          <h2>⏸ PAUSE</h2>
+          <div style="display:flex;gap:10px;justify-content:center">
+            <button class="btn btn-p" onclick="doPause()">▶ 繼續</button>
+            <button class="btn btn-s" onclick="goMenu()">🏠 選曲</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ RESULT ══ -->
+    <section id="view-result" class="view">
+      <div class="rcard">
+        <div class="rgrade" id="rgrade">S</div>
+        <div class="rsong" id="rsong">—</div>
+        <div id="r-newrec">🌟 NEW RECORD！</div>
+        <div class="rstats">
+          <div class="sbox">
+            <div class="sv" id="r-score" style="color:var(--neon-y)">0</div>
+            <div class="sk">SCORE</div>
+          </div>
+          <div class="sbox">
+            <div class="sv" id="r-combo" style="color:var(--neon-c)">0</div>
+            <div class="sk">MAX COMBO</div>
+          </div>
+          <div class="sbox">
+            <div class="sv" id="r-perf" style="color:var(--neon-y)">0</div>
+            <div class="sk">✨ PERFECT</div>
+          </div>
+          <div class="sbox">
+            <div class="sv" id="r-good" style="color:var(--neon-g)">0</div>
+            <div class="sk">👍 GOOD</div>
+          </div>
+          <div class="sbox">
+            <div class="sv" id="r-miss" style="color:var(--neon-r)">0</div>
+            <div class="sk">💔 MISS</div>
+          </div>
+          <div class="sbox">
+            <div class="sv" id="r-acc" style="color:var(--neon-c)">0%</div>
+            <div class="sk">ACCURACY</div>
+          </div>
+        </div>
+        <div class="rbtns">
+          <button class="btn btn-p" onclick="doReplay()">🔁 再玩一次</button>
+          <button class="btn btn-s" onclick="goMenu()">🏠 選曲</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- 難度提示文字 -->
+  <script>
+    const DIFF_HINTS = {
+      easy: '🟢 初學 Easy — Perfect ±250ms ／ Good ±500ms',
+      normal: '⭐ 一般 Normal — Perfect ±150ms ／ Good ±320ms',
+      hard: '🔥 高手 Hard — Perfect ±80ms ／ Good ±180ms',
+      expert: '💀 地獄 Expert — Perfect ±40ms ／ Good ±100ms',
+    };
+    document.querySelectorAll('.dbtn').forEach(btn =>
+      btn.addEventListener('click', () => {
+        document.getElementById('diff-hint').textContent = DIFF_HINTS[btn.dataset.diff] || '';
+      })
+    );
+  </script>
+
+  <script type="module" src="./index.js"></script>
+</body>
+
+</html>
