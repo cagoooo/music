@@ -385,6 +385,62 @@ input:checked+.slider:before {
   font-style: italic;
 }
 
+/* 成就專屬按鈕 */
+.btn-ach {
+  background: linear-gradient(135deg, rgba(255, 222, 0, 0.15), rgba(255, 100, 0, 0.2));
+  border: 1px solid var(--neon-y);
+  border-radius: 30px;
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(255, 222, 0, 0.2), inset 0 0 5px rgba(255, 222, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ach::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: 0.4s;
+}
+
+.btn-ach:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 20px rgba(255, 222, 0, 0.5), inset 0 0 10px rgba(255, 222, 0, 0.3);
+  background: linear-gradient(135deg, rgba(255, 222, 0, 0.25), rgba(255, 100, 0, 0.3));
+}
+
+.btn-ach:hover::before {
+  left: 100%;
+}
+
+.btn-ach:active {
+  transform: translateY(1px);
+  box-shadow: 0 0 8px rgba(255, 222, 0, 0.4);
+}
+
+.ach-icon {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 0 4px rgba(255, 222, 0, 0.8));
+}
+
+.ach-text {
+  font-family: 'Orbitron', 'Rajdhani', sans-serif;
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--neon-y);
+  text-shadow: 0 0 5px rgba(255, 222, 0, 0.5);
+  letter-spacing: 0.05em;
+}
+
 /* 輸入模式切換 */
 .mode-row {
   display: flex;
