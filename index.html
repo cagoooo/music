@@ -1604,9 +1604,10 @@
           </div>
         </label>
 
-        <button class="btn"
-          style="padding: 6px 16px; font-size: 0.95rem; font-weight: bold; border-color: var(--neon-y); color: var(--neon-y); display: flex; align-items: center; gap: 6px;"
-          onclick="showAchievements()"><span>🏆</span> 成就</button>
+        <button class="btn-ach" onclick="showAchievements()">
+          <span class="ach-icon">🏆</span>
+          <span class="ach-text">成就</span>
+        </button>
       </div>
 
       <div class="custom-box" id="custom-box" style="display:none">
@@ -1727,6 +1728,27 @@
       </div>
     </section>
 
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- 成就 Modal -->
+  <div class="pause-ov" id="ach-modal" style="display:none; z-index: 9999; backdrop-filter: blur(10px);">
+    <div class="pause-box"
+      style="text-align: left; max-width: 400px; width: 90%; background: linear-gradient(180deg, rgba(20,20,40,0.95) 0%, rgba(10,10,20,0.98) 100%); border: 1px solid var(--neon-y); box-shadow: 0 0 20px rgba(255, 222, 0, 0.2);">
+      <h2
+        style="color: var(--neon-y); margin-top: 0; text-align: center; font-family: 'Orbitron', sans-serif; text-shadow: 0 0 10px rgba(255, 222, 0, 0.5);">
+        🏆 成就紀錄</h2>
+      <div id="ach-list"
+        style="display: flex; flex-direction: column; gap: 12px; margin: 20px 0; max-height: 50vh; overflow-y: auto; padding-right: 10px;">
+        <!-- Javascript 動態產生 -->
+      </div>
+      <div style="text-align: center;">
+        <button class="btn btn-p" onclick="document.getElementById('ach-modal').style.display='none'"
+          style="box-shadow: 0 0 10px var(--neon-p);">關閉</button>
+      </div>
+    </div>
   </div>
 
   <!-- 難度提示文字 -->
