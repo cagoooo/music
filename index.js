@@ -6,9 +6,16 @@
 'use strict';
 
 import {
-    initGame, startGame, togglePause, getStatus, stopGame,
+    gState, initGame, startGame, togglePause, getStatus, stopGame,
     setOnEnd, getBestScore, DIFFICULTIES,
 } from './game.js';
+
+/* ════════════ 成就資料庫 ════════════ */
+const ACH_DB = {
+    novice: { title: '初出茅廬', desc: '以 A 以上成績通關一首歌', icon: '🌟' },
+    master: { title: '節奏大師', desc: '單次遊玩達成 100 連擊', icon: '🔥' },
+    pitch: { title: '絕對音感', desc: '在麥克風模式以 A 以上成績通關', icon: '🎤' }
+};
 
 import {
     startKeyboardMode, startMicMode, stopAllInputs, bindTouchKeys,
@@ -64,6 +71,15 @@ const SONGS = [
             { num: 5, dur: 1 }, { num: 6, dur: 1 }, { num: 5, dur: 1 }, { num: 3, dur: 1 }, { num: 2, dur: 4 },
         ],
     },
+    {
+        id: 'canon', title: '卡農 (Canon)', subtitle: 'Pachelbel [隱藏解鎖]', bpm: 90, difficulty: 3,
+        reqHide: 'novice',
+        notes: [
+            { num: 3, dur: 1 }, { num: 2, dur: 1 }, { num: 1, dur: 1 }, { num: 7, dur: 1 }, { num: 6, dur: 1 }, { num: 5, dur: 1 }, { num: 6, dur: 1 }, { num: 7, dur: 1 },
+            { num: 1, dur: 1 }, { num: 7, dur: 1 }, { num: 6, dur: 1 }, { num: 5, dur: 1 }, { num: 4, dur: 1 }, { num: 3, dur: 1 }, { num: 4, dur: 1 }, { num: 5, dur: 1 },
+            { num: 1, dur: 1 }, { num: 2, dur: 1 }, { num: 3, dur: 1 }, { num: 4, dur: 1 }, { num: 5, dur: 1 }, { num: 6, dur: 1 }, { num: 7, dur: 1 }, { num: 1, dur: 1 },
+        ],
+    },
 ];
 
 /* ════════════ UI 狀態 ════════════ */
@@ -100,6 +116,9 @@ document.addEventListener('DOMContentLoaded', () => {
     _initDiffButtons();
     _initBpmSlider();
 
+    // 更新音效選單的解鎖狀態
+    _updateHitSoundSelect();
+
     // 觸控按鍵（khint 是按鍵容器）
     bindTouchKeys($('khint'));
 
@@ -116,6 +135,7 @@ export function buildMenu() {
     const dlabels = ['', '初級', '中級', '進階'];
 
     SONGS.forEach(s => {
+        if (s.reqHide && !gState.stats.achievements.includes(s.reqHide)) return;
         const best = getBestScore(s.id);
         const c = document.createElement('div');
         c.className = 'scard';
@@ -185,9 +205,12 @@ function beginSong(song) {
         });
     } else {
         startKeyboardMode();
+        bindTouchKeys($('khint'));
     }
 
-    startGame(song, currentBpm || null, currentDiff);
+    const useMetronome = $('metro-cb')?.checked || false;
+    const currentHitSound = $('hit-sound-sel')?.value || 'default';
+    startGame(song, currentBpm || null, currentDiff, { metronome: useMetronome, hitSound: currentHitSound });
 }
 
 /* ════════════ 自訂簡譜 ════════════ */
@@ -231,6 +254,18 @@ function _showResult(r) {
     const newRec = $('r-newrec');
     if (newRec) newRec.style.display = r.isNewRecord ? 'flex' : 'none';
     _showView('view-result');
+
+    // 顯示解鎖提示 Toast
+    if (r.newUnlocks && r.newUnlocks.length > 0) {
+        setTimeout(() => {
+            r.newUnlocks.forEach((id, idx) => {
+                setTimeout(() => window.showToast(id), idx * 1000);
+            });
+            // 重新刷新首頁選單與音效清單
+            buildMenu();
+            _updateHitSoundSelect();
+        }, 600);
+    }
 }
 
 /* ════════════ 工具 ════════════ */
@@ -248,3 +283,61 @@ function _buildStars() {
         sc.appendChild(s);
     }
 }
+
+/* ════════════ 成就與解鎖 ════════════ */
+function _updateHitSoundSelect() {
+    const sel = $('hit-sound-sel');
+    if (!sel) return;
+    const ach = gState.stats.achievements || [];
+    Array.from(sel.options).forEach(opt => {
+        if (opt.value === 'taiko') opt.disabled = !ach.includes('pitch');
+        if (opt.value === 'cat') opt.disabled = !ach.includes('master');
+    });
+}
+
+window.showAchievements = () => {
+    const ach = gState.stats.achievements || [];
+    const listHtml = Object.keys(ACH_DB).map(id => {
+        const isUnlocked = ach.includes(id);
+        const data = ACH_DB[id];
+        return `
+        <div style="display:flex; align-items:center; background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; opacity: ${isUnlocked ? '1' : '0.4'}">
+            <div style="font-size: 2rem; margin-right: 12px; filter: ${isUnlocked ? 'none' : 'grayscale(1)'}">${data.icon}</div>
+            <div>
+                <div style="font-family:'Rajdhani',sans-serif; font-size: 1.1rem; color: ${isUnlocked ? 'var(--neon-y)' : '#888'}; font-weight: bold;">
+                    ${data.title} ${isUnlocked ? '✔️' : '🔒'}
+                </div>
+                <div style="font-size: 0.8rem; color: var(--dim);">${data.desc}</div>
+            </div>
+        </div>`;
+    }).join('');
+    $('ach-list').innerHTML = listHtml;
+    $('ach-modal').style.display = 'flex';
+};
+
+window.showToast = (achId) => {
+    if (!ACH_DB[achId]) return;
+    const { title, desc, icon } = ACH_DB[achId];
+    const container = $('toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `
+        <div class="toast-icon">${icon}</div>
+        <div class="toast-content">
+            <h4>🏆 成就解鎖</h4>
+            <p>${title}: ${desc}</p>
+        </div>
+    `;
+    container.appendChild(toast);
+
+    // Animate in
+    requestAnimationFrame(() => toast.classList.add('show'));
+
+    // Animate out and remove
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, 4000);
+};
