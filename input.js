@@ -49,24 +49,23 @@ export function bindTouchKeys(container) {
     unbindTouchKeys();
     _touchTarget = container;
     _touchHandler = (e) => {
-        e.preventDefault();  // 阻止捲動與縮放
-        for (const touch of e.changedTouches) {
-            const el = document.elementFromPoint(touch.clientX, touch.clientY);
-            const keyEl = el?.closest?.('[data-num]') || (el?.dataset?.num != null ? el : null);
-            if (!keyEl) continue;
-            const num = parseInt(keyEl.dataset.num);
-            if (!isNaN(num) && num >= 0 && num <= 7) {
-                flashKey(num, true);
-                playerInput(num);
-            }
+        if (e.cancelable) e.preventDefault();  // 阻止捲動與縮放
+        const el = document.elementFromPoint(e.clientX, e.clientY);
+        const keyEl = el?.closest?.('[data-num]') || (el?.dataset?.num != null ? el : null);
+        if (!keyEl) return;
+        const num = parseInt(keyEl.dataset.num);
+        if (!isNaN(num) && num >= 0 && num <= 7) {
+            flashKey(num, true);
+            playerInput(num);
         }
     };
-    container.addEventListener('touchstart', _touchHandler, { passive: false });
+    // 使用 pointerdown 可以更即時且支援滑鼠與觸控
+    container.addEventListener('pointerdown', _touchHandler, { passive: false });
 }
 
 export function unbindTouchKeys() {
     if (_touchTarget && _touchHandler) {
-        _touchTarget.removeEventListener('touchstart', _touchHandler);
+        _touchTarget.removeEventListener('pointerdown', _touchHandler);
     }
     _touchTarget = _touchHandler = null;
 }

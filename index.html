@@ -4,7 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎵 簡譜節拍師 v2.0 — Rhythm Beat Master</title>
+  <!-- SEO -->
+  <title>簡譜節拍師 v2.6 | 網頁太鼓節奏遊戲</title>
+  <meta name="description" content="純前端原生開發的節奏遊戲。支援數字簡譜、麥克風音準偵測、以及自訂歌曲挑戰。">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link
     href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap"
@@ -716,7 +718,7 @@
       }
     }
 
-    /* 軌道區 */
+    /* 軌道區 - 純淨 2D 背景 */
     .track-area {
       flex: 1;
       display: flex;
@@ -725,94 +727,70 @@
       overflow: hidden;
       position: relative;
       padding: 20px 0;
-      /* 漸層背景：上下各有霓虹光暈 */
-      background:
-        radial-gradient(ellipse 100% 60% at 50% 20%, rgba(120, 40, 255, .2) 0%, transparent 70%),
-        radial-gradient(ellipse 100% 60% at 50% 80%, rgba(0, 200, 255, .15) 0%, transparent 70%),
-        linear-gradient(180deg, rgba(12, 8, 30, .98) 0%, rgba(8, 12, 24, .95) 50%, rgba(6, 8, 20, .98) 100%);
+      background: var(--bg);
+      /* 移除霓虹背景 */
     }
 
-    /* 3D 透視軌道 */
+    /* 2D 橫向卷軸 (太鼓軌道) */
     .track {
       position: relative;
-      height: 130px;
-      background:
-        linear-gradient(90deg,
-          rgba(40, 20, 80, .95) 0%,
-          rgba(20, 14, 48, .9) 40%,
-          rgba(10, 8, 28, .85) 70%,
-          rgba(4, 6, 16, .6) 100%);
-      /* 地板光反射 */
-      border-top: 2px solid rgba(180, 74, 255, .6);
-      border-bottom: 2px solid rgba(0, 245, 255, .45);
+      height: 120px;
+      /* 太鼓經典深灰底 */
+      background: #222;
+      /* 上下實心白/灰邊框 */
+      border-top: 2px solid #555;
+      border-bottom: 2px solid #555;
       overflow: visible;
-      box-shadow:
-        0 -12px 50px rgba(180, 74, 255, .2),
-        0 12px 50px rgba(0, 245, 255, .15),
-        inset 0 1px 0 rgba(180, 74, 255, .3),
-        inset 0 -1px 0 rgba(0, 245, 255, .2);
+      /* 移除 3D 透視與發光陰影 */
+      box-shadow: none;
     }
 
-    /* 軌道內部透視網格 */
+    /* 軌道中間點綴線 (模擬五線譜或引導線) */
     .track::before {
       content: '';
       position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(rgba(120, 80, 255, .06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 245, 255, .04) 1px, transparent 1px);
-      background-size: 40px 100%, 80px 100%;
-      pointer-events: none;
-    }
-
-    /* 右側霓虹漸出 */
-    .track::after {
-      content: '';
-      position: absolute;
-      top: 0;
+      top: 50%;
+      left: 0;
       right: 0;
-      width: 30%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, var(--bg));
+      height: 1px;
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-50%);
       pointer-events: none;
-      z-index: 5;
     }
 
-    /* 判定線：立體光柱 */
+    /* 太鼓判定圓環 */
     .jline {
       position: absolute;
-      left: var(--jw);
-      top: -12px;
-      bottom: -12px;
-      width: 4px;
-      background: linear-gradient(180deg,
-          transparent,
-          rgba(0, 245, 255, .3) 15%,
-          var(--neon-c) 40%,
-          var(--neon-c) 60%,
-          rgba(0, 245, 255, .3) 85%,
-          transparent);
-      box-shadow:
-        0 0 10px var(--neon-c),
-        0 0 30px rgba(0, 245, 255, .5),
-        0 0 60px rgba(0, 245, 255, .2);
+      left: calc(var(--jw) - (var(--bh) + 16px) / 2);
+      /* 置中於判定點 */
+      top: 50%;
+      transform: translateY(-50%);
+      width: calc(var(--bh) + 16px);
+      height: calc(var(--bh) + 16px);
+      border-radius: 50%;
+      border: 3px solid rgba(255, 255, 255, 0.4);
+      /* 空心白框 */
+      background: rgba(0, 0, 0, 0.3);
+      /* 實心微深背景 */
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       z-index: 10;
       pointer-events: none;
     }
 
-    /* 判定線中心菱形 */
-    .jline::before {
+    /* 靶心 (可加可不加，讓圓環更精緻) */
+    .jline::after {
       content: '';
       position: absolute;
       top: 50%;
       left: 50%;
-      transform: translate(-50%, -50%) rotate(45deg);
-      width: 18px;
-      height: 18px;
-      background: var(--neon-c);
-      box-shadow: 0 0 20px var(--neon-c), 0 0 40px rgba(0, 245, 255, .5);
-      border-radius: 3px;
+      transform: translate(-50%, -50%);
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.6);
     }
+
+    /* (移除不需要的菱形裝飾) */
 
     /* 判定線光暈環 */
     .jline::after {
@@ -843,7 +821,7 @@
       }
     }
 
-    /* 3D 音符球：金屬光澤 */
+    /* 音符球 (扁平圓餅) */
     .nball {
       position: absolute;
       top: 50%;
@@ -854,20 +832,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.3rem;
+      font-family: 'Orbitron', 'Rajdhani', sans-serif;
+      font-size: 1.4rem;
       font-weight: 900;
       color: #fff;
-      letter-spacing: 0;
-      /* 3D 金屬球質感 */
-      box-shadow:
-        inset -4px -4px 12px rgba(0, 0, 0, .6),
-        inset 3px 3px 8px rgba(255, 255, 255, .25),
-        0 4px 16px rgba(0, 0, 0, .5),
-        0 0 32px currentColor;
+      /* 扁平化，帶有一點點內陰影創造鼓面感，外部加上白色的太鼓外框 */
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.2), 0 0 0 2px #fff;
       z-index: 20;
       pointer-events: none;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, .6);
+      transition: none;
     }
 
     /* 高光點 */
@@ -884,40 +857,39 @@
     }
 
     .nball[data-n="1"] {
-      background: radial-gradient(circle at 35% 30%, #ff8fa0, var(--c1) 60%, #8b0020);
+      background: var(--neon-r);
       color: #fff;
     }
 
     .nball[data-n="2"] {
-      background: radial-gradient(circle at 35% 30%, #ffd0a0, var(--c2) 60%, #7a3800);
+      background: #ff8c00;
     }
 
     .nball[data-n="3"] {
-      background: radial-gradient(circle at 35% 30%, #fff0a0, var(--c3) 60%, #7a6000);
-      color: #222;
-      text-shadow: none;
+      background: var(--neon-y);
+      color: #333;
     }
 
     .nball[data-n="4"] {
-      background: radial-gradient(circle at 35% 30%, #a0ffcc, var(--c4) 60%, #006640);
+      background: var(--neon-g);
+      color: #333;
     }
 
     .nball[data-n="5"] {
-      background: radial-gradient(circle at 35% 30%, #a0f8ff, var(--c5) 60%, #006080);
+      background: var(--neon-c);
     }
 
     .nball[data-n="6"] {
-      background: radial-gradient(circle at 35% 30%, #b0ccff, var(--c6) 60%, #002280);
+      background: #448aff;
     }
 
     .nball[data-n="7"] {
-      background: radial-gradient(circle at 35% 30%, #e8a0ff, var(--c7) 60%, #5c0080);
+      background: var(--neon-p);
     }
 
     .nball[data-n="0"] {
-      background: radial-gradient(circle at 35% 30%, #888, #333 60%, #111);
-      font-size: .85rem;
-      color: #aaa;
+      background: #555;
+      font-size: 1rem;
     }
 
     /* 長音尾巴 */
@@ -981,16 +953,17 @@
     /* 判定文字 */
     .jtxt {
       position: absolute;
-      left: calc(var(--jw) + 16px);
-      top: 50%;
-      transform: translateY(-50%);
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1rem;
+      left: calc(var(--jw));
+      /* 移到判定環上方，避免蓋住太鼓判定點 */
+      top: 15px;
+      transform: translateX(-50%);
+      font-family: 'Rajdhani', 'Orbitron', sans-serif;
+      font-size: 1.25rem;
       font-weight: 900;
       pointer-events: none;
       z-index: 30;
-      animation: jpop .7s ease forwards;
-      letter-spacing: .06em;
+      animation: judge-pop .6s ease forwards;
+      text-align: center;
     }
 
     .jtxt.perfect {
@@ -1029,8 +1002,53 @@
       }
     }
 
-    /* 粒子 */
-    @keyframes pfly {
+    /* 判定附屬文字 (Early / Late) */
+    .jtxt-sub {
+      font-size: 0.6rem;
+      color: rgba(255, 255, 255, 0.8);
+      text-shadow: none;
+      filter: none;
+      margin-top: -2px;
+      letter-spacing: 0.1em;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    /* Combo 特效 */
+    body.cb-10::after {
+      background: radial-gradient(circle at 50% 50%, rgba(180, 74, 255, 0.05) 0%, transparent 80%);
+      animation: cb-pulse 1s infinite alternate;
+    }
+
+    body.cb-20::after {
+      background: radial-gradient(circle at 50% 50%, rgba(0, 245, 255, 0.1) 0%, transparent 80%);
+      animation: cb-pulse-fast 0.6s infinite alternate;
+    }
+
+    @keyframes cb-pulse {
+      from {
+        opacity: 0.5;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes cb-pulse-fast {
+      from {
+        opacity: 0.6;
+        transform: scale(1);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1.02);
+      }
+    }
+
+    /* 粒子 (打擊四散火花) */
+    @keyframes particle-fly {
       0% {
         transform: translate(0, 0) scale(1);
         opacity: 1;
@@ -1046,7 +1064,7 @@
       position: absolute;
       border-radius: 50%;
       pointer-events: none;
-      animation: pfly .6s ease-out forwards;
+      animation: particle-fly 0.4s cubic-bezier(0.25, 1, 0.5, 1) forwards;
       z-index: 40;
     }
 
@@ -1465,6 +1483,56 @@
         font-size: .55rem;
       }
     }
+
+    /* ════════════ 成就系統 UI ════════════ */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: linear-gradient(135deg, rgba(20, 14, 48, 0.95), rgba(40, 20, 80, 0.95));
+      border-left: 4px solid var(--neon-y);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 200, 0, 0.3);
+      border-radius: 8px;
+      padding: 12px 20px;
+      color: #fff;
+      font-family: 'Rajdhani', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transform: translateX(120%);
+      opacity: 0;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s;
+    }
+
+    .toast.show {
+      transform: translateX(0);
+      opacity: 1;
+    }
+
+    .toast-icon {
+      font-size: 1.8rem;
+    }
+
+    .toast-content h4 {
+      margin: 0 0 4px 0;
+      color: var(--neon-y);
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+    }
+
+    .toast-content p {
+      margin: 0;
+      font-size: 0.8rem;
+      color: var(--dim);
+    }
   </style>
 </head>
 
@@ -1473,7 +1541,7 @@
   <div id="app">
 
     <header>
-      <div class="logo">🎵 節拍師 <span>BEAT MASTER</span></div>
+      <div class="logo">🎵 節拍師 <span>BEAT MASTER v2.6</span></div>
       <div id="hdr-right">
         <span id="hdr-song"></span>
         <button class="hbtn" onclick="doPause()">⏸ 暫停</button>
@@ -1482,7 +1550,8 @@
 
     <!-- ══ MENU ══ -->
     <section id="view-menu" class="view active">
-      <h1 class="mtitle">🎵 簡譜節拍師</h1>
+      <h1 class="mtitle">🎵 簡譜節拍師 <span
+          style="font-size: 0.4em; color: var(--neon-p); vertical-align: super;">v2.6</span></h1>
       <p class="msub">CHOOSE YOUR SONG · FOLLOW THE BEAT</p>
 
       <div class="mode-row">
@@ -1497,12 +1566,36 @@
         <button class="dbtn" data-diff="hard">🔥 高手</button>
         <button class="dbtn" data-diff="expert">💀 地獄</button>
       </div>
-      <p class="diff-hint" id="diff-hint">⭐ 一般 — Perfect ±150ms ／ Good ±320ms</p>
+      <p class="diff-hint" id="diff-hint" style="margin-bottom: 8px;">⭐ 一般 — Perfect ±150ms ／ Good ±320ms</p>
 
       <div class="bpm-row">
         <label>速度</label>
         <input type="range" id="bpm-sl" min="50" max="180" value="100">
         <span id="bpm-v">100 BPM</span>
+      </div>
+
+      <!-- 音效與成就列 -->
+      <div style="display: flex; justify-content: center; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+        <label
+          style="color:var(--dim); font-size: 0.9rem; font-family:'Rajdhani',sans-serif; cursor: pointer; display: flex; align-items: center;">
+          <input type="checkbox" id="metro-cb" style="accent-color: var(--neon-p); margin-right: 4px;">
+          定音節拍器
+        </label>
+
+        <label
+          style="color:var(--dim); font-size: 0.9rem; font-family:'Rajdhani',sans-serif; display: flex; align-items: center;">
+          打擊音效：
+          <select id="hit-sound-sel"
+            style="background: rgba(0,0,0,0.5); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 2px 6px; margin-left: 4px; font-family:'Rajdhani',sans-serif; outline: none;">
+            <option value="default">預設 (電子弦樂)</option>
+            <option value="taiko" disabled>太鼓 (需解鎖 絕對音感)</option>
+            <option value="cat" disabled>喵星人 (需解鎖 節奏大師)</option>
+          </select>
+        </label>
+
+        <button class="btn"
+          style="padding: 4px 12px; font-size: 0.85rem; border-color: var(--neon-y); color: var(--neon-y);"
+          onclick="showAchievements()">🏆 成就</button>
       </div>
 
       <div class="custom-box" id="custom-box" style="display:none">
