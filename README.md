@@ -3,6 +3,8 @@
 > **太鼓達人風格** × 簡譜節奏遊戲 × Web Audio API  
 > 使用鍵盤或麥克風，跟著節拍打出完美判定！並解鎖多樣隱藏成就與獎勵！
 
+🌐 **線上使用：[簡譜節拍節奏大師](https://cagoooo.github.io/music/)**
+
 ---
 
 ## ✨ 功能特色
@@ -163,7 +165,7 @@ MIT License — 歡迎自由使用與修改
 - Repository：`cagoooo/music`
 - 可見性：公開
 - 主要技術：HTML
-- 線上入口：未在 GitHub repository metadata 設定
+- 線上入口：<https://cagoooo.github.io/music/>
 
 ### 可以怎麼應用
 
